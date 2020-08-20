@@ -98,7 +98,10 @@
 		output wire [C_S00_AXI_DATA_WIDTH-1 : 0] s00_axi_rdata,
 		output wire [1 : 0] s00_axi_rresp,
 		output wire s00_axi_rvalid,
-		input  wire s00_axi_rready
+		input  wire s00_axi_rready,
+		
+		// Ports to ALI
+		output wire[16:0] backoff_counter
 	);
 
     wire slv_reg_wren_signal;
@@ -384,7 +387,9 @@
         .high_tx_allowed0(high_tx_allowed_internal0),
         .high_tx_allowed1(high_tx_allowed_internal1),
         .high_tx_allowed2(high_tx_allowed_internal2),
-        .high_tx_allowed3(high_tx_allowed_internal3)
+        .high_tx_allowed3(high_tx_allowed_internal3),
+        
+        .backoff_counter(backoff_counter)
     );
 
     tx_control # (

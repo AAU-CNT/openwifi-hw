@@ -51,7 +51,10 @@
     output wire high_tx_allowed0,
     output wire high_tx_allowed1,
     output wire high_tx_allowed2,
-    output wire high_tx_allowed3
+    output wire high_tx_allowed3,
+    
+    output reg [31:0] backoff_counter,
+    output reg info_intr
 	);
 
     localparam [1:0]  BACKOFF_CH_BUSY =      2'b00,
@@ -95,6 +98,7 @@
     reg [31:0] random_number = 32'h0b00a001;
     reg [12:0] backoff_timer;
     reg [11:0] backoff_wait_timer;
+    reg [31:0] backoff_wait_counter;
     wire backoff_done;
 
     assign is_pspoll = (((FC_type==2'b01) && (FC_subtype==4'b1010))?1:0);
@@ -253,8 +257,10 @@
     // media access random backoff state machine
     always @(posedge clk) 
     begin
+      info_intr <= 0;
       if (!rstn) begin
           backoff_timer<=0;
+          backoff_wait_counter<=0;
           backoff_wait_timer<=0;
           last_fcs_valid<=0;
           take_new_random_number<=0;
@@ -263,8 +269,10 @@
       end else begin
         backoff_state_old <= backoff_state;
         last_fcs_valid <= (fcs_in_strobe?fcs_valid:last_fcs_valid);
+
         case (backoff_state)
           BACKOFF_CH_BUSY: begin
+            backoff_wait_counter<=backoff_wait_counter+1;
             backoff_timer<=0;
             take_new_random_number<=0;
             if (!ch_idle_final) begin
@@ -281,6 +289,7 @@
           end
 
           BACKOFF_WAIT: begin
+            backoff_wait_counter<=backoff_wait_counter;
             backoff_wait_timer<=( backoff_wait_timer==0?backoff_wait_timer:(tsf_pulse_1M?(backoff_wait_timer-1):backoff_wait_timer) );
             if (ch_idle_final) begin
               if (backoff_wait_timer==0) begin
@@ -300,8 +309,14 @@
           end
           
           BACKOFF_RUN: begin
+            backoff_wait_counter<=backoff_wait_counter;
             take_new_random_number<=0;
             backoff_wait_timer<=backoff_wait_timer;
+            if (backoff_state_old == BACKOFF_WAIT) begin
+              info_intr <= 1;
+              backoff_counter<=backoff_wait_counter;
+              backoff_wait_counter<=0;
+            end
             if (ch_idle_final) begin
               backoff_timer<=( backoff_timer==0?backoff_timer:(tsf_pulse_1M?(backoff_timer-1):backoff_timer) );
               backoff_state<=backoff_state;
@@ -316,6 +331,7 @@
           end
 
           BACKOFF_SUSPEND: begin // data is calculated by calc_phy_header C program
+            backoff_wait_counter<=backoff_wait_counter;
             take_new_random_number<=take_new_random_number;
             backoff_wait_timer<=backoff_wait_timer;
             backoff_timer<=backoff_timer;

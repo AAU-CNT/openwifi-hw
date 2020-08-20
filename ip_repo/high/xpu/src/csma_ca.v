@@ -51,7 +51,9 @@
     output wire high_tx_allowed0,
     output wire high_tx_allowed1,
     output wire high_tx_allowed2,
-    output wire high_tx_allowed3
+    output wire high_tx_allowed3,
+    
+    output wire [16:0] backoff_counter
 	);
 
     localparam [1:0]  BACKOFF_CH_BUSY =      2'b00,
@@ -95,6 +97,7 @@
     reg [31:0] random_number = 32'h0b00a001;
     reg [12:0] backoff_timer;
     reg [11:0] backoff_wait_timer;
+    reg [16:0] backoff_wait_counter;
     wire backoff_done;
 
     assign is_pspoll = (((FC_type==2'b01) && (FC_subtype==4'b1010))?1:0);
@@ -113,6 +116,8 @@
     assign high_tx_allowed1 = (backoff_done && slice_en1);
     assign high_tx_allowed2 = (backoff_done && slice_en2);
     assign high_tx_allowed3 = (backoff_done && slice_en3);
+    
+    assign backoff_counter = backoff_wait_counter;
 
     n_sym_len14_pkt # (
     ) n_sym_ackcts_pkt_i (
@@ -263,6 +268,7 @@
       end else begin
         backoff_state_old <= backoff_state;
         last_fcs_valid <= (fcs_in_strobe?fcs_valid:last_fcs_valid);
+        backoff_wait_counter<=backoff_wait_counter+1;
         case (backoff_state)
           BACKOFF_CH_BUSY: begin
             backoff_timer<=0;
@@ -302,6 +308,7 @@
           BACKOFF_RUN: begin
             take_new_random_number<=0;
             backoff_wait_timer<=backoff_wait_timer;
+            backoff_wait_counter=0;
             if (ch_idle_final) begin
               backoff_timer<=( backoff_timer==0?backoff_timer:(tsf_pulse_1M?(backoff_timer-1):backoff_timer) );
               backoff_state<=backoff_state;

@@ -98,7 +98,10 @@
 		output wire [C_S00_AXI_DATA_WIDTH-1 : 0] s00_axi_rdata,
 		output wire [1 : 0] s00_axi_rresp,
 		output wire s00_axi_rvalid,
-		input  wire s00_axi_rready
+		input  wire s00_axi_rready,
+		
+		// Interrupt to PS
+		output wire info_intr
 	);
 
     wire slv_reg_wren_signal;
@@ -107,8 +110,8 @@
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg2; // tsf load value low
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg3; // tsf load value high (the rising edge of msb will trigger loading)
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg4; // 19:16 band; 15:0 channel
-    //wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg5; // 
-    //wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg6; //
+    wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg5; // backoff counter
+    wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg6; // info interrupt mode
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg7; // rssi report offset, and gpio delay ctrl for rssi calculation, and reset the fifo delay
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg8; // lbt rssi threshold
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg9; // xIFS and slot time override for debug
@@ -237,8 +240,12 @@
     wire [4:0] slot_time;
     wire [6:0] sifs_time;
     wire [6:0] phy_rx_start_delay_time;
+    
+    wire info_intr_internal;
+    
+    assign info_intr = (slv_reg6[1]==0?info_intr_internal:slv_reg6[0]);
 
-    assign slv_reg63 = 32'hf016055a;//version -- internet git commit revision
+    assign slv_reg63 = 32'hc016055a;//version -- internet git commit revision
 
     assign erp_short_slot = slv_reg4[24];
     assign band = slv_reg4[19:16];
@@ -384,7 +391,10 @@
         .high_tx_allowed0(high_tx_allowed_internal0),
         .high_tx_allowed1(high_tx_allowed_internal1),
         .high_tx_allowed2(high_tx_allowed_internal2),
-        .high_tx_allowed3(high_tx_allowed_internal3)
+        .high_tx_allowed3(high_tx_allowed_internal3),
+        
+        .backoff_counter(slv_reg5),
+        .info_intr(info_intr_internal)
     );
 
     tx_control # (
@@ -588,9 +598,9 @@
 		.SLV_REG1(slv_reg1),
 		.SLV_REG2(slv_reg2),
 		.SLV_REG3(slv_reg3),
-		.SLV_REG4(slv_reg4),/*
+		.SLV_REG4(slv_reg4),
         .SLV_REG5(slv_reg5),
-        .SLV_REG6(slv_reg6),*/
+        .SLV_REG6(slv_reg6),
         .SLV_REG7(slv_reg7),
 		.SLV_REG8(slv_reg8),
         .SLV_REG9(slv_reg9),
