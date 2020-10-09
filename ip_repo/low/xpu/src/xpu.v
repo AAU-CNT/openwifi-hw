@@ -110,7 +110,7 @@
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg2; // tsf load value low
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg3; // tsf load value high (the rising edge of msb will trigger loading)
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg4; // 19:16 band; 15:0 channel
-    wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg5; // backoff counter
+    //wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg5;
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg6; // info interrupt mode
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg7; // rssi report offset, and gpio delay ctrl for rssi calculation, and reset the fifo delay
     wire [(C_S00_AXI_DATA_WIDTH-1):0] slv_reg8; // lbt rssi threshold
@@ -168,7 +168,7 @@
 	wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg59;//tsf timer high
 	//wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg60;//RSSI. step size half dB
 	//wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg61;//IQ RSSI. step size half dB
-	//wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg62;
+	wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg62; // backoff_counter
 	wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg63;//FPGA version info
 	
 	wire block_rx_dma_to_ps_internal;
@@ -245,7 +245,8 @@
     
     assign info_intr = (slv_reg6[1]==0?info_intr_internal:slv_reg6[0]);
 
-    assign slv_reg63 = 32'hc016055a;//version -- internet git commit revision
+    assign slv_reg63 = 32'h03ac70f3;//version -- internet git commit revision
+    assign slv_reg62 = 32'h12345678;
 
     assign erp_short_slot = slv_reg4[24];
     assign band = slv_reg4[19:16];
@@ -393,7 +394,7 @@
         .high_tx_allowed2(high_tx_allowed_internal2),
         .high_tx_allowed3(high_tx_allowed_internal3),
         
-        .backoff_counter(slv_reg5),
+        //.backoff_counter(slv_reg5),
         .info_intr(info_intr_internal)
     );
 
@@ -599,7 +600,7 @@
 		.SLV_REG2(slv_reg2),
 		.SLV_REG3(slv_reg3),
 		.SLV_REG4(slv_reg4),
-        .SLV_REG5(slv_reg5),
+        //.SLV_REG5(slv_reg5),
         .SLV_REG6(slv_reg6),
         .SLV_REG7(slv_reg7),
 		.SLV_REG8(slv_reg8),
@@ -658,7 +659,7 @@
         .SLV_REG59(slv_reg59),
         //.SLV_REG60(slv_reg60),
         //.SLV_REG61(slv_reg61),
-        //.SLV_REG62(slv_reg62)//,
+        .SLV_REG62(slv_reg62),
         .SLV_REG63(slv_reg63)
 	);
 

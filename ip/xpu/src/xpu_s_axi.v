@@ -23,7 +23,7 @@
         output wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG2,
         output wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG3,
         output wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG4,
-        output wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG5,
+        //output wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG5,
         output wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG6,
         output wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG7,
         output wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG8,
@@ -80,7 +80,7 @@
         input  wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG59,
         //input  wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG60,
         //input  wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG61,
-        //input  wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG62,
+        input  wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG62,
         input  wire [C_S_AXI_DATA_WIDTH-1:0] SLV_REG63,
 		// User ports ends
 		// Do not modify the ports beyond this line
@@ -175,7 +175,7 @@
 	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg2;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg3;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg4;
-	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg5;
+	//reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg5;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg6;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg7;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg8;
@@ -232,7 +232,7 @@
 	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg59;
 	// reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg60;
 	// reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg61;
-	//reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg62;
+	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg62;
 	reg [C_S_AXI_DATA_WIDTH-1:0]	slv_reg63;
 	wire	 slv_reg_rden;
 	wire	 slv_reg_wren;
@@ -256,7 +256,7 @@
     assign SLV_REG2 = slv_reg2;
     assign SLV_REG3 = slv_reg3;
     assign SLV_REG4 = slv_reg4;
-    assign SLV_REG5 = slv_reg5;
+    //assign SLV_REG5 = slv_reg5;
     assign SLV_REG6 = slv_reg6;
     assign SLV_REG7 = slv_reg7;
     assign SLV_REG8 = slv_reg8;
@@ -385,7 +385,7 @@
 	      slv_reg2 <= 32'h0;
 	      slv_reg3 <= 32'h0;
 	      slv_reg4 <= 32'h0;
-	      slv_reg5 <= 32'h0;
+	      //slv_reg5 <= 32'h0;
 	      slv_reg6 <= 32'h0;
 	      slv_reg7 <= 32'h0;
 	      slv_reg8 <= 32'h0;
@@ -453,13 +453,13 @@
 	                // Slave register 4
 	                slv_reg4[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
 	              end
-	          6'h05:
+	          /*6'h05:
 	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
 	              if ( S_AXI_WSTRB[byte_index] == 1 ) begin
 	                // Respective byte enables are asserted as per write strobes 
 	                // Slave register 5
 	                slv_reg5[(byte_index*8) +: 8] <= S_AXI_WDATA[(byte_index*8) +: 8];
-	              end
+	              end*/
 	          6'h06:
 	            for ( byte_index = 0; byte_index <= (C_S_AXI_DATA_WIDTH/8)-1; byte_index = byte_index+1 )
 	              if ( S_AXI_WSTRB[byte_index] == 1 ) begin
@@ -648,7 +648,7 @@
 	                      slv_reg2 <= slv_reg2;
 	                      slv_reg3 <= slv_reg3;
 	                      slv_reg4 <= slv_reg4;
-	                      slv_reg5 <= slv_reg5;
+	                      //slv_reg5 <= slv_reg5;
 	                      slv_reg6 <= slv_reg6;
 	                      slv_reg7 <= slv_reg7;
 	                      slv_reg8 <= slv_reg8;
@@ -788,7 +788,7 @@
 	        6'h02   : reg_data_out <= slv_reg2;
 	        6'h03   : reg_data_out <= slv_reg3;
 	        6'h04   : reg_data_out <= slv_reg4;
-	        6'h05   : reg_data_out <= slv_reg5;
+	        //6'h05   : reg_data_out <= slv_reg5;
 	        6'h06   : reg_data_out <= slv_reg6;
 	        6'h07   : reg_data_out <= slv_reg7;
 	        6'h08   : reg_data_out <= slv_reg8;
@@ -845,7 +845,7 @@
 	        6'h3B   : reg_data_out <= slv_reg59;
 	        //6'h3C   : reg_data_out <= slv_reg60;
 	        //6'h3D   : reg_data_out <= slv_reg61;
-	        //6'h3E   : reg_data_out <= slv_reg62;
+	        6'h3E   : reg_data_out <= slv_reg62;
 	        6'h3F   : reg_data_out <= slv_reg63;
 	        default : reg_data_out <= 0;
 	      endcase
@@ -918,11 +918,11 @@
           slv_reg59 <= 32'h0;
           //slv_reg60 <= 32'h0;
           //slv_reg61 <= 32'h0;
-          //slv_reg62 <= 32'h0;
+          slv_reg62 <= 32'h0;
           slv_reg63 <= 32'h0;
         end 
       else
-        begin    
+        begin   
           // slv_reg20 <= SLV_REG20;
           // slv_reg21 <= SLV_REG21;
           // slv_reg22 <= SLV_REG22;
@@ -966,7 +966,7 @@
           slv_reg59 <= SLV_REG59;
           //slv_reg60 <= SLV_REG60;
           //slv_reg61 <= SLV_REG61;
-          //slv_reg62 <= SLV_REG62;
+          slv_reg62 <= SLV_REG62;
           slv_reg63 <= SLV_REG63;
 
         end 

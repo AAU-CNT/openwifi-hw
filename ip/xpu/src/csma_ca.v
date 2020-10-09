@@ -53,7 +53,7 @@
     output wire high_tx_allowed2,
     output wire high_tx_allowed3,
     
-    output reg [31:0] backoff_counter,
+    output wire [31:0] backoff_counter,
     output reg info_intr
 	);
 
@@ -101,6 +101,7 @@
     reg [31:0] backoff_wait_counter;
     wire backoff_done;
 
+    assign backoff_counter = 32'h12345678;
     assign is_pspoll = (((FC_type==2'b01) && (FC_subtype==4'b1010))?1:0);
     assign is_rts    = (((FC_type==2'b01) && (FC_subtype==4'b1011) && (signal_len==20))?1:0);//20 is the length of rts frame
 
@@ -260,7 +261,6 @@
       info_intr <= 0;
       if (!rstn) begin
           backoff_timer<=0;
-          backoff_wait_counter<=0;
           backoff_wait_timer<=0;
           last_fcs_valid<=0;
           take_new_random_number<=0;
@@ -289,7 +289,6 @@
           end
 
           BACKOFF_WAIT: begin
-            backoff_wait_counter<=backoff_wait_counter;
             backoff_wait_timer<=( backoff_wait_timer==0?backoff_wait_timer:(tsf_pulse_1M?(backoff_wait_timer-1):backoff_wait_timer) );
             if (ch_idle_final) begin
               if (backoff_wait_timer==0) begin
@@ -309,13 +308,12 @@
           end
           
           BACKOFF_RUN: begin
-            backoff_wait_counter<=backoff_wait_counter;
             take_new_random_number<=0;
             backoff_wait_timer<=backoff_wait_timer;
             if (backoff_state_old == BACKOFF_WAIT) begin
               info_intr <= 1;
-              backoff_counter<=backoff_wait_counter;
-              backoff_wait_counter<=0;
+              //backoff_counter<=backoff_wait_counter + 16;
+              //backoff_wait_counter<=0;
             end
             if (ch_idle_final) begin
               backoff_timer<=( backoff_timer==0?backoff_timer:(tsf_pulse_1M?(backoff_timer-1):backoff_timer) );
@@ -331,7 +329,6 @@
           end
 
           BACKOFF_SUSPEND: begin // data is calculated by calc_phy_header C program
-            backoff_wait_counter<=backoff_wait_counter;
             take_new_random_number<=take_new_random_number;
             backoff_wait_timer<=backoff_wait_timer;
             backoff_timer<=backoff_timer;
