@@ -53,7 +53,7 @@
     output wire high_tx_allowed2,
     output wire high_tx_allowed3,
     
-    output wire [31:0] backoff_counter,
+    output reg [31:0] backoff_counter,
     output reg info_intr
 	);
 
@@ -101,7 +101,6 @@
     reg [31:0] backoff_wait_counter;
     wire backoff_done;
 
-    assign backoff_counter = 32'h12345678;
     assign is_pspoll = (((FC_type==2'b01) && (FC_subtype==4'b1010))?1:0);
     assign is_rts    = (((FC_type==2'b01) && (FC_subtype==4'b1011) && (signal_len==20))?1:0);//20 is the length of rts frame
 
@@ -312,8 +311,8 @@
             backoff_wait_timer<=backoff_wait_timer;
             if (backoff_state_old == BACKOFF_WAIT) begin
               info_intr <= 1;
-              //backoff_counter<=backoff_wait_counter + 16;
-              //backoff_wait_counter<=0;
+              backoff_counter<=backoff_wait_counter;
+              backoff_wait_counter<=0;
             end
             if (ch_idle_final) begin
               backoff_timer<=( backoff_timer==0?backoff_timer:(tsf_pulse_1M?(backoff_timer-1):backoff_timer) );
