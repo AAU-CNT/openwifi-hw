@@ -168,7 +168,7 @@
 	wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg59;//tsf timer high
 	//wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg60;//RSSI. step size half dB
 	//wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg61;//IQ RSSI. step size half dB
-	wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg62; // backoff_counter
+	wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg62; // info_readout
 	wire [C_S00_AXI_DATA_WIDTH-1:0]	slv_reg63;//FPGA version info
 	
 	wire block_rx_dma_to_ps_internal;
@@ -244,8 +244,7 @@
     wire info_intr_internal;
     
     assign info_intr = (slv_reg6[1]==0?info_intr_internal:slv_reg6[0]);
-
-    assign slv_reg63 = 32'h1e712d93;//version -- internet git commit revision
+    assign slv_reg63 = 32'hc844f659;//version -- internet git commit revision
 
     assign erp_short_slot = slv_reg4[24];
     assign band = slv_reg4[19:16];
@@ -393,7 +392,7 @@
         .high_tx_allowed2(high_tx_allowed_internal2),
         .high_tx_allowed3(high_tx_allowed_internal3),
         
-        .backoff_counter(slv_reg62),
+        .info_readout0(slv_reg62),
         .info_intr(info_intr_internal)
     );
 

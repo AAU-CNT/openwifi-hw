@@ -53,7 +53,7 @@
     output wire high_tx_allowed2,
     output wire high_tx_allowed3,
     
-    output reg [31:0] backoff_counter,
+    output wire [31:0] info_readout0, // Random value[31:16], counter[15:0]
     output reg info_intr
 	);
 
@@ -98,8 +98,17 @@
     reg [31:0] random_number = 32'h0b00a001;
     reg [12:0] backoff_timer;
     reg [11:0] backoff_wait_timer;
-    reg [31:0] backoff_wait_counter;
     wire backoff_done;
+    
+    // INFO
+    reg [15:0] info_backoff_counter;
+    reg [15:0] info_backoff_count; // Final output
+    reg [15:0] info_random_value; // Final output
+    
+    assign info_readout0[31:16] = info_random_value;
+    assign info_readout0[15:0] = info_backoff_count;
+    //assign info_readout0[15:0] = 'hdead;
+    
 
     assign is_pspoll = (((FC_type==2'b01) && (FC_subtype==4'b1010))?1:0);
     assign is_rts    = (((FC_type==2'b01) && (FC_subtype==4'b1011) && (signal_len==20))?1:0);//20 is the length of rts frame
@@ -265,13 +274,17 @@
           take_new_random_number<=0;
           backoff_state<=BACKOFF_CH_BUSY;
           backoff_state_old<=BACKOFF_CH_BUSY;
+          info_backoff_counter<=0;
       end else begin
         backoff_state_old <= backoff_state;
         last_fcs_valid <= (fcs_in_strobe?fcs_valid:last_fcs_valid);
-
+        // INFO
+        info_backoff_counter<=info_backoff_counter;
+        info_backoff_count<=info_backoff_count;
+        info_random_value<=info_random_value;
+        
         case (backoff_state)
           BACKOFF_CH_BUSY: begin
-            backoff_wait_counter<=backoff_wait_counter+1;
             backoff_timer<=0;
             take_new_random_number<=0;
             if (!ch_idle_final) begin
@@ -293,7 +306,13 @@
               if (backoff_wait_timer==0) begin
                 backoff_state<=BACKOFF_RUN;
                 backoff_timer<=(num_slot_random*slot_time);
+                info_random_value<=(num_slot_random*slot_time); // INFO
                 take_new_random_number<=1;
+                
+               // INFO
+               info_backoff_counter<=info_backoff_counter+1;
+               info_backoff_count<=info_backoff_counter;
+               info_intr<=1;
               end else begin
                 backoff_state<=backoff_state;
                 backoff_timer<=backoff_timer;
@@ -309,17 +328,18 @@
           BACKOFF_RUN: begin
             take_new_random_number<=0;
             backoff_wait_timer<=backoff_wait_timer;
-            if (backoff_state_old == BACKOFF_WAIT) begin
-              info_intr <= 1;
-              backoff_counter<=backoff_wait_counter;
-              backoff_wait_counter<=0;
-            end
+
             if (ch_idle_final) begin
               backoff_timer<=( backoff_timer==0?backoff_timer:(tsf_pulse_1M?(backoff_timer-1):backoff_timer) );
               backoff_state<=backoff_state;
+              
+              // INFO
+              if (backoff_timer == 0) info_backoff_counter<=0;
+              
             end else begin
               backoff_timer<=backoff_timer;
               if (backoff_timer==0) begin
+                
                 backoff_state<=BACKOFF_CH_BUSY;
               end else begin
                 backoff_state<=BACKOFF_SUSPEND;
