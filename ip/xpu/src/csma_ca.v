@@ -307,11 +307,11 @@
                 backoff_state<=BACKOFF_RUN;
                 backoff_timer<=(num_slot_random*slot_time);
                 info_random_value<=(num_slot_random*slot_time); // INFO
+                //info_random_value<=42;
                 take_new_random_number<=1;
                 
                // INFO
-               info_backoff_counter<=info_backoff_counter+1;
-               info_backoff_count<=info_backoff_counter;
+               info_backoff_count<=info_backoff_counter + 1;
                info_intr<=1;
               end else begin
                 backoff_state<=backoff_state;
@@ -322,6 +322,9 @@
               backoff_state<=BACKOFF_CH_BUSY;
               backoff_timer<=backoff_timer;
               take_new_random_number<=take_new_random_number;
+              
+              // INFO
+              info_backoff_counter<=info_backoff_counter+1;
             end
           end
           

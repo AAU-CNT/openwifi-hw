@@ -244,7 +244,7 @@
     wire info_intr_internal;
     
     assign info_intr = (slv_reg6[1]==0?info_intr_internal:slv_reg6[0]);
-    assign slv_reg63 = 32'hc844f659;//version -- internet git commit revision
+    assign slv_reg63 = 32'hbb567df0;//version -- internet git commit revision
 
     assign erp_short_slot = slv_reg4[24];
     assign band = slv_reg4[19:16];
